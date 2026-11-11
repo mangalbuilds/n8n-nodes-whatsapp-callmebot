@@ -3,6 +3,9 @@ import {
   INodeExecutionData,
   INodeType,
   INodeTypeDescription,
+  JsonObject,
+  NodeApiError,
+  NodeConnectionTypes,
   NodeOperationError,
 } from 'n8n-workflow';
 
@@ -13,17 +16,18 @@ export class CallMeBot implements INodeType {
     icon: 'file:whatsapp.svg',
     group: ['transform'],
     version: 1,
+    usableAsTool: true,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
     description: 'Send instant free WhatsApp messages and speed-to-lead alerts using CallMeBot API',
     defaults: {
       name: 'WhatsApp CallMeBot',
     },
-    inputs: ['main'],
-    outputs: ['main'],
+    inputs: [NodeConnectionTypes.Main],
+    outputs: [NodeConnectionTypes.Main],
     credentials: [
       {
         name: 'callMeBotApi',
-        required: false,
+        required: true,
       },
     ],
     properties: [
@@ -61,53 +65,6 @@ export class CallMeBot implements INodeType {
         default: 'send',
       },
       {
-        displayName: 'Authentication Mode',
-        name: 'authMode',
-        type: 'options',
-        options: [
-          {
-            name: 'Use Saved Credential',
-            value: 'credential',
-            description: 'Use credentials configured in n8n credentials manager',
-          },
-          {
-            name: 'Specify In Node Parameters',
-            value: 'parameter',
-            description: 'Enter phone and API key directly in this node (useful for dynamic recipients)',
-          },
-        ],
-        default: 'parameter',
-        description: 'How to provide the CallMeBot Phone Number and API Key',
-      },
-      {
-        displayName: 'Phone Number',
-        name: 'phone',
-        type: 'string',
-        displayOptions: {
-          show: {
-            authMode: ['parameter'],
-          },
-        },
-        default: '',
-        placeholder: '919876543210',
-        required: true,
-        description: 'Target WhatsApp phone number including country code (e.g. 919876543210 or 15551234567). Non-digits will be stripped.',
-      },
-      {
-        displayName: 'API Key',
-        name: 'apiKey',
-        type: 'string',
-        typeOptions: { password: true },
-        displayOptions: {
-          show: {
-            authMode: ['parameter'],
-          },
-        },
-        default: '',
-        required: true,
-        description: 'CallMeBot API key for this WhatsApp phone number',
-      },
-      {
         displayName: 'Message Text',
         name: 'text',
         type: 'string',
@@ -128,45 +85,26 @@ export class CallMeBot implements INodeType {
 
     for (let i = 0; i < items.length; i++) {
       try {
-        const authMode = this.getNodeParameter('authMode', i) as string;
-        let phone = '';
-        let apiKey = '';
-
-        if (authMode === 'credential') {
-          const credentials = await this.getCredentials('callMeBotApi', i);
-          phone = credentials.phone as string;
-          apiKey = credentials.apiKey as string;
-        } else {
-          phone = this.getNodeParameter('phone', i) as string;
-          apiKey = this.getNodeParameter('apiKey', i) as string;
-        }
-
         const rawText = this.getNodeParameter('text', i) as string;
 
-        // Sanitize phone number (remove +, spaces, hyphens)
-        const sanitizedPhone = phone.replace(/[^\d]/g, '');
-
-        if (!sanitizedPhone) {
-          throw new NodeOperationError(this.getNode(), 'Invalid Phone Number provided', {
+        if (!rawText) {
+          throw new NodeOperationError(this.getNode(), 'Message text is required', {
             itemIndex: i,
           });
         }
 
-        if (!apiKey) {
-          throw new NodeOperationError(this.getNode(), 'CallMeBot API Key is required', {
-            itemIndex: i,
-          });
-        }
-
-        // CallMeBot requires URL-encoded query parameters
-        const encodedText = encodeURIComponent(rawText);
-        const url = `https://api.callmebot.com/whatsapp.php?phone=${sanitizedPhone}&text=${encodedText}&apikey=${apiKey}`;
-
-        const response = await this.helpers.httpRequest({
-          method: 'GET',
-          url,
-          returnFullResponse: true,
-        });
+        const response = await this.helpers.httpRequestWithAuthentication.call(
+          this,
+          'callMeBotApi',
+          {
+            method: 'GET',
+            url: 'https://api.callmebot.com/whatsapp.php',
+            qs: {
+              text: rawText,
+            },
+            returnFullResponse: true,
+          },
+        );
 
         const responseBody = (response.body as string) || '';
         const isSuccess =
@@ -180,7 +118,6 @@ export class CallMeBot implements INodeType {
           json: {
             success: isSuccess,
             statusCode: response.statusCode,
-            phone: sanitizedPhone,
             messagePreview: rawText.slice(0, 80),
             rawResponse: responseBody.trim(),
             timestamp: new Date().toISOString(),
@@ -202,11 +139,10 @@ export class CallMeBot implements INodeType {
           });
           continue;
         }
-        throw error;
+        throw new NodeApiError(this.getNode(), error as JsonObject);
       }
     }
 
     return [returnData];
   }
 }
-
