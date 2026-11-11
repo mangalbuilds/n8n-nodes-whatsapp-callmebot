@@ -59,7 +59,7 @@ export class CallMeBot implements INodeType {
             name: 'Send Text Message',
             value: 'send',
             description: 'Send a WhatsApp message to a phone number',
-            action: 'Send a WhatsApp message',
+            action: 'Send a whatsapp message',
           },
         ],
         default: 'send',
