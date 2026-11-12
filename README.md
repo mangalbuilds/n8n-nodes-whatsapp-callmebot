@@ -39,7 +39,7 @@ npm install n8n-nodes-whatsapp-callmebot
 
 ## 🔑 How to Get Your Free CallMeBot API Key (1-Minute Setup)
 
-1. Save the CallMeBot phone number to your contacts: **`+34 644 44 49 61`** (or follow instructions at [CallMeBot WhatsApp Setup](https://www.callmebot.com/blog/free-api-whatsapp-messages/)).
+1. Save the current active CallMeBot phone number to your contacts: **`+34 644 20 47 56`** (Alternate active numbers: **`+34 644 26 33 77`** / **`+34 621 06 21 63`**, or check live status at [CallMeBot WhatsApp Setup](https://www.callmebot.com/blog/free-api-whatsapp-messages/)).
 2. Send this exact message to that number from your WhatsApp:
    ```text
    I allow callmebot to send me messages
