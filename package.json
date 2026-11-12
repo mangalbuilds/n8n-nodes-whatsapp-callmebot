@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-whatsapp-callmebot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Send instant free WhatsApp notifications and alerts directly from n8n using CallMeBot API",
   "keywords": [
     "n8n-community-node-package",

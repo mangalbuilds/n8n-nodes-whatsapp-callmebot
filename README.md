@@ -65,7 +65,7 @@ npm install n8n-nodes-whatsapp-callmebot
 Built by **Mangal Soren**  
 - **GitHub:** [@mangalbuilds](https://github.com/mangalbuilds)  
 - **Email:** `mangal@usevance.com`  
-- **Live Products:** [usevance.com](https://usevance.com) • [trackkaroai.com](https://trackkaroai.com)
+- **Live Products:** [usevance.com](https://usevance.com) • [trackkaroai.com](https://trackkaroai.com) • [getprex.com](https://getprex.com/)
 
 ---
 
