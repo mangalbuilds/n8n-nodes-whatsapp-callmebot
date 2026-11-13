@@ -4,7 +4,7 @@
 [![n8n community node](https://img.shields.io/badge/n8n-community--node-FF6D5A?style=for-the-badge&logo=n8n)](https://n8n.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-An official n8n community node to dispatch **instant, 100% free WhatsApp messages and speed-to-lead alerts** via CallMeBot API.
+An n8n community node to dispatch **instant, 100% free WhatsApp messages and speed-to-lead alerts** via CallMeBot API.
 
 Zero complex Meta Cloud API verification, zero Facebook Business Manager headaches, and zero credit cards required.
 
@@ -12,11 +12,10 @@ Zero complex Meta Cloud API verification, zero Facebook Business Manager headach
 
 ## ⚡ Why Use This Node?
 
-- 🚀 **15-Second Lead-to-WhatsApp Dispatch:** Perfect for high-ticket B2B agencies, clinics, and real estate speed-to-lead systems.
-- 🆓 **100% Free WhatsApp API:** Powered by CallMeBot WhatsApp service.
+- 🚀 **Lead-to-WhatsApp Dispatch:** Deliver instant alerts for new leads, form submissions, or urgent system notifications.
+- 🆓 **100% Free WhatsApp Gateway:** Powered by the free CallMeBot WhatsApp service.
 - 🛡️ **Auto Phone Number Sanitization:** Automatically strips spaces, hyphens, and `+` prefixes to prevent routing 400 errors.
 - 🔤 **Full Unicode & Emoji Support:** Auto URL-encodes emojis, newlines, and bullet points.
-- 🔑 **Dual Auth Mode:** Supports both n8n Credentials Manager and direct node expressions for dynamic multi-recipient dispatch.
 
 ---
 
@@ -45,18 +44,53 @@ npm install n8n-nodes-whatsapp-callmebot
    I allow callmebot to send me messages
    ```
 3. CallMeBot will reply with your personal **`apikey`** within 10 seconds.
-4. Paste your phone number (with country code) and API key into n8n!
+4. Save your phone number and API key in n8n Credentials!
 
 ---
 
-## 🛠️ Usage & Parameters
+## 🛠️ Usage & Setup
 
-| Parameter | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| **Authentication Mode** | Options | Yes | Choose `Specify In Node Parameters` or `Use Saved Credential`. |
-| **Phone Number** | String | Yes | Target phone number with international dial code (e.g. `919876543210` or `15551234567`). |
-| **API Key** | String | Yes | Your CallMeBot API key. |
-| **Message Text** | String | Yes | The text content to dispatch. Supports n8n dynamic expressions (`{{ $json.body.lead_name }}`) and emojis. |
+### Step 1: Create the Credential
+In n8n, navigate to **Credentials** > **New Credential** and search for **CallMeBot WhatsApp API** (`callMeBotApi`). Enter:
+- **Phone Number:** Your verified WhatsApp number with international country code (no `+` or spaces, e.g. `919876543210` or `15551234567`).
+- **API Key:** The apikey string received from the CallMeBot bot.
+
+### Step 2: Add the Node to Your Workflow
+Add the **WhatsApp CallMeBot** node to your workflow. The node exposes the following parameters:
+- **Resource:** `Message` (default)
+- **Operation:** `Send Text Message` (default)
+- **Message Text:** The message string to send. Supports static text, emojis, newlines, and dynamic n8n expressions.
+
+### Step 3: Example Expression
+You can map incoming trigger data (e.g. from a Webhook, Typeform, or Google Sheets node) directly into **Message Text**:
+
+```text
+🚨 New Lead Received!
+Name: {{ $json.body.name }}
+Email: {{ $json.body.email }}
+Phone: {{ $json.body.phone }}
+Time: {{ $now.format('YYYY-MM-DD HH:mm') }}
+```
+
+### Step 4: Output Fields
+When executed, the node returns a structured JSON payload:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "messagePreview": "🚨 New Lead Received!\nName: John Doe...",
+  "rawResponse": "Message queued for delivery",
+  "timestamp": "2026-11-13T15:27:00.000Z"
+}
+```
+
+| Output Field | Type | Description |
+| :--- | :--- | :--- |
+| **success** | Boolean | `true` if HTTP status is 200 and CallMeBot accepted the message queue. |
+| **statusCode** | Number | The HTTP response status code (e.g. `200`). |
+| **messagePreview** | String | The first 80 characters of the sent text. |
+| **rawResponse** | String | The raw response text returned from the CallMeBot API. |
+| **timestamp** | String | ISO 8601 timestamp of execution. |
 
 ---
 
@@ -65,11 +99,10 @@ npm install n8n-nodes-whatsapp-callmebot
 Built by **Mangal Soren**  
 - **GitHub:** [@mangalbuilds](https://github.com/mangalbuilds)  
 - **Email:** `mangal@usevance.com`  
-- **Live Products:** [usevance.com](https://usevance.com) • [trackkaroai.com](https://trackkaroai.com) • [getprex.com](https://getprex.com/)
+- **Website:** [usevance.com](https://usevance.com) • [trackkaroai.com](https://trackkaroai.com) • [getprex.com](https://getprex.com/)
 
 ---
 
 ## 📜 License
 
 [MIT](LICENSE)
-
